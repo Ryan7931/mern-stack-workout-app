@@ -9,6 +9,11 @@ const PORT = process.env.PORT || 4000;
 // Middleware
 app.use(express.json());
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ message: 'Workout API draait!' });
+});
+
 // Routes
 app.use('/api/workouts', workoutRoutes);
 
