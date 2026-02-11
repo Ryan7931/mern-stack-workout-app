@@ -4,4 +4,4 @@
 
 <!-- mongoDB connection string = mongodb+srv://myapp:<db_password>@mern-database.1fqywms.mongodb.net/?appName=MERN-Database -->
 
-<!-- Huidige stap = Database verbinding ; probleem = database verbind niet -->
+<!-- Huidige stap = opdracht 5 -->
