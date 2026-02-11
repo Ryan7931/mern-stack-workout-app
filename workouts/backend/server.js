@@ -1,24 +1,27 @@
-// Importeer Express
+// server.js
 import express from 'express';
+import workoutRoutes from './src/routes/workoutRoutes.js';
 
-// Maak Express app
 const app = express();
-
-// Haal PORT uit .env (of gebruik 4000)
 const PORT = process.env.PORT || 4000;
 
-// Middleware: lees JSON
+// Middleware
 app.use(express.json());
 
-// Test route - reageer op GET /
+// Routes
+app.use('/api/workouts', workoutRoutes);
+
+// Test route
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'Hallo, dit is mijn backend server!',
-    success: true
+    message: 'Backend API draait!',
+    endpoints: {
+      workouts: '/api/workouts'
+    }
   });
 });
 
-// Start de server
+// Start server
 app.listen(PORT, () => {
   console.log(`Server draait op http://localhost:${PORT}`);
 });
