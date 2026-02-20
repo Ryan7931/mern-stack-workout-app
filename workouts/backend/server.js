@@ -3,6 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import workoutRoutes from './src/routes/workoutRoutes.js';
+import authRoutes from './src/routes/authRoutes.js';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/workouts', workoutRoutes);
+app.use('/api/auth', authRoutes);
 
 // Verbind met MongoDB en start server
 mongoose.connect(process.env.MONGO_URI)
