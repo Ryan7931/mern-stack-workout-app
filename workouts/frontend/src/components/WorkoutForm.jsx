@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function WorkoutForm({ onSubmitSuccess }) {
+function WorkoutForm({ onSubmitSuccess, token }) {
   const [title, setTitle] = useState('');
   const [reps, setReps] = useState('');
   const [load, setLoad] = useState('');
@@ -19,11 +19,12 @@ function WorkoutForm({ onSubmitSuccess }) {
     };
 
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch('http://localhost:4000/api/workouts', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify(workout)
       });
 
