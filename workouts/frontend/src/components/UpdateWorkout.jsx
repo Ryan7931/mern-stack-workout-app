@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-function UpdateWorkout({ workoutId, currentTitle, currentReps, currentLoad, onUpdateSuccess, onCancel }) {
+function UpdateWorkout({ workoutId, currentTitle, currentReps, currentLoad, token, onUpdateSuccess, onCancel }) {
+  // Formulier om een bestaande workout te bewerken; vereist token (owner-check op backend)
   const [title, setTitle] = useState(currentTitle);
   const [reps, setReps] = useState(currentReps);
   const [load, setLoad] = useState(currentLoad);
@@ -19,22 +20,34 @@ function UpdateWorkout({ workoutId, currentTitle, currentReps, currentLoad, onUp
     };
 
     try {
+      // Controleer of token aanwezig is (frontend guard). Backend doet ook owner-check.
+      if (!token) {
+        setError('Je moet ingelogd zijn');
+        setLoading(false);
+        return;
+      }
+
+      // Zet headers (Content-Type + Authorization)
+      const headers = { 'Content-Type': 'application/json' };
+      headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch(`http://localhost:4000/api/workouts/${workoutId}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify(updatedWorkout)
       });
 
+      // Parse response en handel serverreactie af
       const data = await response.json();
 
       if (response.ok) {
+        // Succes: laat parent opnieuw ophalen
         console.log('Workout aangepast!', data);
         if (onUpdateSuccess) {
           onUpdateSuccess();
         }
       } else {
+        // Fout (validatie of autorisatie)
         setError(data.error || 'Fout bij het aanpassen van workout');
         console.error('Error:', data.error);
       }

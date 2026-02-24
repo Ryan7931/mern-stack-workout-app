@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-function DeleteWorkout({ workoutId, workoutTitle, onDeleteSuccess }) {
+function DeleteWorkout({ workoutId, workoutTitle, token, onDeleteSuccess }) {
+  // Verwijderknop voor een workout; stuurt Authorization header mee bij DELETE
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -13,18 +14,33 @@ function DeleteWorkout({ workoutId, workoutTitle, onDeleteSuccess }) {
     setLoading(true);
 
     try {
+      // Zorg dat er een token is; zonder token kunnen we de eigenaar niet verifiëren
+      if (!token) {
+        setError('Je moet ingelogd zijn');
+        setLoading(false);
+        return;
+      }
+
+      // Authorization header voor backend owner-check
+      const headers = {};
+      headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch(`http://localhost:4000/api/workouts/${workoutId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers
       });
 
+      // Parse response en controleer resultaat
       const data = await response.json();
 
       if (response.ok) {
+        // Succes — vraag parent om data te verversen
         console.log('Workout verwijderd!', data);
         if (onDeleteSuccess) {
           onDeleteSuccess();
         }
       } else {
+        // Server gaf een fout (bijv. niet jouw workout)
         setError(data.error || 'Fout bij het verwijderen van workout');
         console.error('Error:', data.error);
       }

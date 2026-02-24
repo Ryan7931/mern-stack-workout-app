@@ -1,7 +1,8 @@
 import Workout from "../models/Workout.js";
 import mongoose from "mongoose";
 
-// GET alle workouts
+// GET alle workouts voor de ingelogde gebruiker
+// Retourneert alleen workouts waar `userId` overeenkomt met de ingelogde user
 export const getAllWorkouts = async (req, res) => {
   try {
     // 1. Haal alle workouts op
@@ -17,7 +18,9 @@ export const getAllWorkouts = async (req, res) => {
   }
 };
 
-// GET één workout op basis van ID
+// GET één workout op basis van ID (openbare lookup)
+// Let op: deze route geeft een workout terug zonder owner-check.
+// Gebruik deze alleen voor lezen; bewerken/verwijderen vereist owner-checks.
 export const getWorkoutById = async (req, res) => {
   // 1. Haal ID uit URL
   const { id } = req.params;
@@ -43,7 +46,7 @@ export const getWorkoutById = async (req, res) => {
   }
 };
 
-// POST nieuwe workout
+// POST nieuwe workout — maakt een workout en koppelt deze aan de ingelogde user
 export const createWorkout = async (req, res) => {
   // 1. Haal data uit request
   const { title, reps, load } = req.body;
@@ -62,7 +65,8 @@ export const createWorkout = async (req, res) => {
   }
 };
 
-// PATCH workout (aanpassen)
+// PATCH workout (aanpassen) — alleen eigenaar kan aanpassen
+// We gebruiken een filter met {_id, userId} zodat de backend eigenaar controleert
 export const updateWorkout = async (req, res) => {
   const { id } = req.params;
 
@@ -72,6 +76,7 @@ export const updateWorkout = async (req, res) => {
   }
 
   try {
+    // Zoek en update in één stap: match op _id EN userId om eigenaar te verzekeren
     const workout = await Workout.findOneAndUpdate(
       { _id: id, userId: req.user._id },
       { ...req.body },
@@ -88,7 +93,8 @@ export const updateWorkout = async (req, res) => {
   }
 };
 
-// DELETE workout (verwijderen)
+// DELETE workout (verwijderen) — alleen eigenaar kan verwijderen
+// findOneAndDelete zoekt op zowel _id als userId
 export const deleteWorkout = async (req, res) => {
   const { id } = req.params;
 
@@ -98,6 +104,7 @@ export const deleteWorkout = async (req, res) => {
   }
 
   try {
+    // Zoek en verwijder alleen wanneer de ingelogde user de eigenaar is
     const workout = await Workout.findOneAndDelete({ 
       _id: id,
       userId: req.user._id

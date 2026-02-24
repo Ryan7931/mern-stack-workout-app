@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 function WorkoutForm({ onSubmitSuccess, token }) {
+  // Formulier om een nieuwe workout aan te maken (stuurt token als header mee)
   const [title, setTitle] = useState('');
   const [reps, setReps] = useState('');
   const [load, setLoad] = useState('');
@@ -19,6 +20,7 @@ function WorkoutForm({ onSubmitSuccess, token }) {
     };
 
     try {
+      // meegeven van Content-Type en Authorization als token aanwezig
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -28,9 +30,11 @@ function WorkoutForm({ onSubmitSuccess, token }) {
         body: JSON.stringify(workout)
       });
 
+      // JSON-parsing van response
       const data = await response.json();
 
       if (response.ok) {
+        // Succes: reset formulier en vraag parent om nieuw ophalen
         console.log('Workout aangemaakt!', data);
         setTitle('');
         setReps('');
@@ -39,6 +43,7 @@ function WorkoutForm({ onSubmitSuccess, token }) {
           onSubmitSuccess();
         }
       } else {
+        // Server-side validatie of autorisatie fout
         setError(data.error || 'Fout bij het aanmaken van workout');
         console.error('Error:', data.error);
       }

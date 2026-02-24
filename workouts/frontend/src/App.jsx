@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react';
 import WorkoutForm from './components/WorkoutForm';
 import WorkoutList from './components/WorkoutList';
-import Login from './components/Login';
+import Auth from './components/Auth';
 
 function App() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // token in state — gebruikt om te bepalen of gebruiker ingelogd is
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
 
+  // Haal workouts van de backend; voegt Authorization header toe als token aanwezig
   const fetchWorkouts = async () => {
     setLoading(true);
     setError(null);
 
+    // token uit localStorage (frontend kan token ook uit state gebruiken)
     const token = localStorage.getItem('token');
 
     if (!token) {
+      // geen token => niet ingelogd, stop met ophalen
       console.log('Niet ingelogd');
       setLoading(false);
       return;
@@ -45,6 +49,7 @@ function App() {
   };
 
   useEffect(() => {
+    // Herlaad workouts wanneer token verandert (bij login/logout)
     fetchWorkouts();
   }, [token]);
 
@@ -61,10 +66,12 @@ function App() {
   };
 
   const handleLogin = (newToken) => {
+    // Token is opgeslagen door Login/Register; update App state
     setToken(newToken);
   };
 
   const handleLogout = () => {
+    // Verwijder token lokaal en reset app state
     localStorage.removeItem('token');
     setToken(null);
     setWorkouts([]);
@@ -75,24 +82,27 @@ function App() {
     <div className="App">
       <h1>Workouts</h1>
       {!token ? (
-        <Login onLoginSuccess={handleLogin} />
+        <Auth onAuthSuccess={handleLogin} />
       ) : (
         <div style={{ marginBottom: '12px' }}>
           <button onClick={handleLogout}>Uitloggen</button>
         </div>
       )}
-
-      <WorkoutForm token={token} onSubmitSuccess={handleWorkoutAdded} />
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {loading ? (
-        <p>Laden...</p>
-      ) : (
-        <WorkoutList
-          workouts={workouts}
-          token={token}
-          onUpdateSuccess={handleWorkoutUpdated}
-          onDeleteSuccess={handleWorkoutDeleted}
-        />
+      {token && (
+        <>
+          <WorkoutForm token={token} onSubmitSuccess={handleWorkoutAdded} />
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {loading ? (
+            <p>Laden...</p>
+          ) : (
+            <WorkoutList
+              workouts={workouts}
+              token={token}
+              onUpdateSuccess={handleWorkoutUpdated}
+              onDeleteSuccess={handleWorkoutDeleted}
+            />
+          )}
+        </>
       )}
     </div>
   );
